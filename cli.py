@@ -4,12 +4,26 @@ Command Line Interface for Tb Score Ii Clinical Severity.
 import argparse
 import csv
 import json
+import os
+import re
 import sys
+from pathlib import Path
 from agents.models import SystemTaskPayload
 from agents.supervisor import SystemSupervisor
 from agents.base import AuditLogger
 
 supervisor = SystemSupervisor(model_provider="mock")
+
+
+def _safe_resolve_path(path_str: str) -> Path:
+    """Resolve a path safely, preventing directory traversal outside cwd."""
+    path = Path(path_str).resolve()
+    cwd = Path.cwd().resolve()
+    import tempfile
+    temp_dir = Path(tempfile.gettempdir()).resolve()
+    if not (str(path).startswith(str(cwd)) or str(path).startswith(str(temp_dir))):
+        raise ValueError(f"Path traversal blocked: {path_str} resolves outside allowed directories")
+    return path
 
 
 def main(argv=None):
@@ -80,7 +94,12 @@ def main(argv=None):
         return 0
 
     if args.command == "batch":
-        with open(args.input, mode="r", encoding="utf-8-sig") as f:
+        input_path = _safe_resolve_path(args.input)
+        output_path = _safe_resolve_path(args.output)
+        if not input_path.exists():
+            print(f"Error: Input file not found: {args.input}", file=sys.stderr)
+            return 1
+        with open(input_path, mode="r", encoding="utf-8-sig") as f:
             reader = csv.DictReader(f)
             fieldnames = list(reader.fieldnames or [])
             rows = list(reader)
@@ -104,7 +123,7 @@ def main(argv=None):
             row_dict["audit_hash"] = dossier.audit_hash
             out_rows.append(row_dict)
 
-        with open(args.output, mode="w", encoding="utf-8", newline="") as f:
+        with open(output_path, mode="w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=out_fields)
             writer.writeheader()
             writer.writerows(out_rows)

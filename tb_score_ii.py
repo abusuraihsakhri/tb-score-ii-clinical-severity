@@ -12,8 +12,33 @@ import argparse
 import csv
 import json
 import math
+import os
+import re
 import sys
+from pathlib import Path
 from typing import Dict, Any, List, Optional
+
+
+def _safe_resolve_path(path_str: str) -> Path:
+    """Resolve a path safely, preventing directory traversal outside cwd."""
+    path = Path(path_str).resolve()
+    cwd = Path.cwd().resolve()
+    # Allow paths under cwd or under common temp directories (for tests)
+    import tempfile
+    temp_dir = Path(tempfile.gettempdir()).resolve()
+    if not (str(path).startswith(str(cwd)) or str(path).startswith(str(temp_dir))):
+        raise ValueError(f"Path traversal blocked: {path_str} resolves outside allowed directories")
+    return path
+
+
+def _sanitize_fieldnames(fieldnames: List[str]) -> List[str]:
+    """Sanitize CSV field names to prevent injection via headers."""
+    sanitized = []
+    for fn in fieldnames:
+        # Strip control characters and limit length
+        clean = re.sub(r'[\x00-\x1f\x7f]', '', fn)[:128]
+        sanitized.append(clean)
+    return sanitized
 
 
 def calculate_metrics(**kwargs) -> Dict[str, Any]:
@@ -32,9 +57,14 @@ def calculate_metrics(**kwargs) -> Dict[str, Any]:
     numeric_vals = [val for val in params.values() if isinstance(val, (int, float))]
     primary_val = numeric_vals[0] if numeric_vals else 1.0
 
+    # Guard against non-finite values
+    if not math.isfinite(primary_val):
+        primary_val = 1.0
+
     score = primary_val
     for idx, nv in enumerate(numeric_vals[1:], start=2):
-        score += nv * (1.0 / idx)
+        if math.isfinite(nv):
+            score += nv * (1.0 / idx)
 
     rounded_score = round(score, 2)
     
@@ -66,9 +96,18 @@ def process_single(args) -> None:
 
 
 def process_batch(input_csv: str, output_csv: str) -> None:
-    with open(input_csv, mode="r", encoding="utf-8-sig") as f:
+    input_path = _safe_resolve_path(input_csv)
+    output_path = _safe_resolve_path(output_csv)
+
+    if not input_path.exists():
+        raise FileNotFoundError(f"Input file not found: {input_csv}")
+    if not input_path.is_file():
+        raise ValueError(f"Input path is not a file: {input_csv}")
+
+    with open(input_path, mode="r", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
-        fieldnames = list(reader.fieldnames or [])
+        raw_fieldnames = list(reader.fieldnames or [])
+        fieldnames = _sanitize_fieldnames(raw_fieldnames)
         rows = list(reader)
 
     out_fields = fieldnames + ["score", "classification", "clinical_recommendation"]
@@ -82,7 +121,7 @@ def process_batch(input_csv: str, output_csv: str) -> None:
         row_dict["clinical_recommendation"] = calc_res["clinical_recommendation"]
         out_rows.append(row_dict)
 
-    with open(output_csv, mode="w", encoding="utf-8", newline="") as f:
+    with open(output_path, mode="w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=out_fields)
         writer.writeheader()
         writer.writerows(out_rows)
@@ -111,7 +150,11 @@ def main(argv=None):
     if args.command == "single":
         args.func(args)
     elif args.command == "batch":
-        process_batch(args.input, args.output)
+        try:
+            process_batch(args.input, args.output)
+        except (FileNotFoundError, ValueError) as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
 
 
 if __name__ == "__main__":
