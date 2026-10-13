@@ -39,13 +39,13 @@ class CurrentStateEngine:
         if primary_value > self.threshold * 2:
             status = "CRITICAL_ALERT"
             alerts.append(f"Current State: Primary value {primary_value:.2f} breached critical threshold ({self.threshold * 2:.2f})")
-            recs.append("Initiate immediate protocol review and escalate to attending lead.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         elif primary_value > self.threshold:
             status = "WARNING"
             alerts.append(f"Current State: Value {primary_value:.2f} exceeds baseline threshold ({self.threshold:.2f})")
-            recs.append("Increase monitoring frequency and perform secondary verification.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         else:
-            recs.append("Parameters nominal under standard operating bounds.")
+            recs.append("Below the demonstration threshold; no clinical status is implied.")
 
         res = CurrentStateEngineResult(
             feature_name="Current State",
@@ -89,13 +89,13 @@ class EnrichmentRoadmapEngine:
         if primary_value > self.threshold * 2:
             status = "CRITICAL_ALERT"
             alerts.append(f"Enrichment Roadmap: Primary value {primary_value:.2f} breached critical threshold ({self.threshold * 2:.2f})")
-            recs.append("Initiate immediate protocol review and escalate to attending lead.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         elif primary_value > self.threshold:
             status = "WARNING"
             alerts.append(f"Enrichment Roadmap: Value {primary_value:.2f} exceeds baseline threshold ({self.threshold:.2f})")
-            recs.append("Increase monitoring frequency and perform secondary verification.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         else:
-            recs.append("Parameters nominal under standard operating bounds.")
+            recs.append("Below the demonstration threshold; no clinical status is implied.")
 
         res = EnrichmentRoadmapEngineResult(
             feature_name="Enrichment Roadmap",
@@ -139,13 +139,13 @@ class WhoTreatmentOutcomeMappingEngine:
         if primary_value > self.threshold * 2:
             status = "CRITICAL_ALERT"
             alerts.append(f"WHO Treatment Outcome Mapping: Primary value {primary_value:.2f} breached critical threshold ({self.threshold * 2:.2f})")
-            recs.append("Initiate immediate protocol review and escalate to attending lead.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         elif primary_value > self.threshold:
             status = "WARNING"
             alerts.append(f"WHO Treatment Outcome Mapping: Value {primary_value:.2f} exceeds baseline threshold ({self.threshold:.2f})")
-            recs.append("Increase monitoring frequency and perform secondary verification.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         else:
-            recs.append("Parameters nominal under standard operating bounds.")
+            recs.append("Below the demonstration threshold; no clinical status is implied.")
 
         res = WhoTreatmentOutcomeMappingEngineResult(
             feature_name="WHO Treatment Outcome Mapping",
@@ -189,13 +189,13 @@ class MdrtbRiskStratificationEngine:
         if primary_value > self.threshold * 2:
             status = "CRITICAL_ALERT"
             alerts.append(f"MDR-TB Risk Stratification: Primary value {primary_value:.2f} breached critical threshold ({self.threshold * 2:.2f})")
-            recs.append("Initiate immediate protocol review and escalate to attending lead.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         elif primary_value > self.threshold:
             status = "WARNING"
             alerts.append(f"MDR-TB Risk Stratification: Value {primary_value:.2f} exceeds baseline threshold ({self.threshold:.2f})")
-            recs.append("Increase monitoring frequency and perform secondary verification.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         else:
-            recs.append("Parameters nominal under standard operating bounds.")
+            recs.append("Below the demonstration threshold; no clinical status is implied.")
 
         res = MdrtbRiskStratificationEngineResult(
             feature_name="MDR-TB Risk Stratification",
@@ -239,13 +239,13 @@ class NutritionalStatusIntegrationEngine:
         if primary_value > self.threshold * 2:
             status = "CRITICAL_ALERT"
             alerts.append(f"Nutritional Status Integration: Primary value {primary_value:.2f} breached critical threshold ({self.threshold * 2:.2f})")
-            recs.append("Initiate immediate protocol review and escalate to attending lead.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         elif primary_value > self.threshold:
             status = "WARNING"
             alerts.append(f"Nutritional Status Integration: Value {primary_value:.2f} exceeds baseline threshold ({self.threshold:.2f})")
-            recs.append("Increase monitoring frequency and perform secondary verification.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         else:
-            recs.append("Parameters nominal under standard operating bounds.")
+            recs.append("Below the demonstration threshold; no clinical status is implied.")
 
         res = NutritionalStatusIntegrationEngineResult(
             feature_name="Nutritional Status Integration",
@@ -289,13 +289,13 @@ class ArtIntegrationForTbhivCoinfectionEngine:
         if primary_value > self.threshold * 2:
             status = "CRITICAL_ALERT"
             alerts.append(f"ART Integration for TB/HIV Co-Infection: Primary value {primary_value:.2f} breached critical threshold ({self.threshold * 2:.2f})")
-            recs.append("Initiate immediate protocol review and escalate to attending lead.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         elif primary_value > self.threshold:
             status = "WARNING"
             alerts.append(f"ART Integration for TB/HIV Co-Infection: Value {primary_value:.2f} exceeds baseline threshold ({self.threshold:.2f})")
-            recs.append("Increase monitoring frequency and perform secondary verification.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         else:
-            recs.append("Parameters nominal under standard operating bounds.")
+            recs.append("Below the demonstration threshold; no clinical status is implied.")
 
         res = ArtIntegrationForTbhivCoinfectionEngineResult(
             feature_name="ART Integration for TB/HIV Co-Infection",
@@ -339,13 +339,13 @@ class SputumCultureConversionTracker:
         if primary_value > self.threshold * 2:
             status = "CRITICAL_ALERT"
             alerts.append(f"Sputum Culture Conversion Tracker: Primary value {primary_value:.2f} breached critical threshold ({self.threshold * 2:.2f})")
-            recs.append("Initiate immediate protocol review and escalate to attending lead.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         elif primary_value > self.threshold:
             status = "WARNING"
             alerts.append(f"Sputum Culture Conversion Tracker: Value {primary_value:.2f} exceeds baseline threshold ({self.threshold:.2f})")
-            recs.append("Increase monitoring frequency and perform secondary verification.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         else:
-            recs.append("Parameters nominal under standard operating bounds.")
+            recs.append("Below the demonstration threshold; no clinical status is implied.")
 
         res = SputumCultureConversionTrackerResult(
             feature_name="Sputum Culture Conversion Tracker",
@@ -389,13 +389,13 @@ class ContactTracingProtocolEngine:
         if primary_value > self.threshold * 2:
             status = "CRITICAL_ALERT"
             alerts.append(f"Contact Tracing Protocol: Primary value {primary_value:.2f} breached critical threshold ({self.threshold * 2:.2f})")
-            recs.append("Initiate immediate protocol review and escalate to attending lead.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         elif primary_value > self.threshold:
             status = "WARNING"
             alerts.append(f"Contact Tracing Protocol: Value {primary_value:.2f} exceeds baseline threshold ({self.threshold:.2f})")
-            recs.append("Increase monitoring frequency and perform secondary verification.")
+            recs.append("Review the demonstration threshold; no clinical action is implied.")
         else:
-            recs.append("Parameters nominal under standard operating bounds.")
+            recs.append("Below the demonstration threshold; no clinical status is implied.")
 
         res = ContactTracingProtocolEngineResult(
             feature_name="Contact Tracing Protocol",

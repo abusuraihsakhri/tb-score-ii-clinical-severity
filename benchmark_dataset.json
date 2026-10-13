@@ -1,7 +1,7 @@
 {
   "suite_name": "Tb Score Ii Clinical Severity Golden Benchmark Test Suite",
   "system_slug": "tb-score-ii-clinical-severity",
-  "standard_reference": "CAP / CLSI / NIST Standards",
+  "standard_reference": "None — legacy simulation only",
   "test_cases": [
     {
       "case_id": "BENCH-01-NOMINAL",

@@ -1,172 +1,75 @@
-# Tb Score II Clinical Severity
+# TBscore II — Clinical Severity
 
-> **Domain:** Infectious Disease Surveillance & Microbiology
-> **Reference Guidelines & Standards:** `CLSI M100, EUCAST & CDC NHSN Clinical Standards`
+A small, dependency-free clinical scoring implementation of **TBscore II**, the eight-point Bandim assessment for monitoring pulmonary tuberculosis during treatment. A browser calculator, Python CLI, batch CSV mode, and optional FastAPI endpoint are provided.
 
-<div align="center">
+**Intended for research and education.** This score is not a diagnostic test, mortality probability estimator, drug resistance predictor, or substitute for clinical evaluation.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
+## Clinical definition
 
-</div>
+The four binary findings **cough**, **dyspnea**, **chest pain**, and **clinical anemia (e.g., pale conjunctivae)** each contribute one point. BMI < 18 kg/m² adds one point and BMI < 16 adds another. MUAC < 220 mm adds one point and MUAC < 200 mm adds another. Total: **0–8 points**.
 
----
+| Severity class | Points |
+|---|---:|
+| I | 0–1 |
+| II | 2–3 |
+| III | 4–7 |
+| IV | 8 |
 
-## 📖 What It Does
+Cutoffs are strictly less-than. Both anthropometric measurements are required. A baseline-to-follow-up decline of at least 25% was investigated in the original study, but is not an individual-level risk estimate. The validation results differed by study population.
 
-TBscore II Clinical Severity Index for Tuberculosis.
-Calculates TBscore II from signs and symptoms to predict treatment failure and mortality in pulmonary TB.
+**Reference:** Rudolf F, et al. *TBscore II: refining and validating a simple clinical score for treatment monitoring of patients with pulmonary tuberculosis*. Scand J Infect Dis. 2013;45(11):825–836. [doi:10.3109/00365548.2013.826876](https://doi.org/10.3109/00365548.2013.826876).
 
-Zero-dependency Python implementation with single and batch evaluation.
-Author: Dr. Abu Suraih Sakhri
-License: MIT
+## Use
 
----
-
-## ⚙️ Key Capabilities & Algorithmic Modules
-
-### 🔬 Analytical Functions
-
-- **`calculate_metrics()`**: Core domain algorithm for tb-score-ii-clinical-severity.
-- **`process_single()`** — Evaluates a single case with v1/v2/v3 parameters.
-- **`process_batch()`** — Processes CSV files with path traversal protection and input validation.
-- **`main()`** — CLI entry point for tb_score_ii module.
-
-### 🤖 Enterprise Agent Suite (`agents/`)
-
-- **`SystemSupervisor`** — Multi-worker orchestrator with PHI guard validation.
-- **`InvariantQCWorker`** — Primary metric threshold monitoring.
-- **`SafetyEscalationWorker`** — Critical safety interlock detection.
-- **`ProtocolConformanceWorker`** — Discordance and anomaly triage.
-- **`AuditTrail`** — HMAC-SHA256 tamper-evident audit logging.
-- **`PHIGuard`** — Zero-PHI outbound interceptor with regex pattern detection.
-
----
-
-## 💻 Installation
+The static browser calculator is in `web/`. It requires no Python, backend, Pyodide or account. With a local HTTP server:
 
 ```bash
-pip install -r requirements.txt
+python -m http.server 8080 --directory web
 ```
 
----
+Open `http://localhost:8080`. The browser uses JavaScript ES modules and performs calculations locally.
 
-## 💻 CLI Quickstart & Usage
+### Python CLI
 
-### 1. Single Case Evaluation
+Requires Python 3.10 or newer. The score itself requires only the standard library.
+
 ```bash
-python tb_score_ii.py single --v1 14.5 --v2 4.2 --v3 1.8
-```
-
-### 2. Batch CSV Processing
-```bash
+python tb_score_ii.py single --cough yes --dyspnea no --chest-pain yes --anemia no --bmi 17.5 --muac-mm 215
 python tb_score_ii.py batch -i sample.csv -o results.csv
 ```
 
-### 3. Enterprise Agent CLI
+Batch CSV must contain exactly `cough,dyspnea,chest_pain,anemia,bmi,muac_mm`. The four sign fields accept `yes/no`, `true/false`, or `1/0`. Blank, invalid, or nonfinite measurements are rejected. On invalid rows, no partial output file is written. Never use identifying patient data in the sample file or browser calculator.
+
+### Optional FastAPI server and legacy utilities
+
 ```bash
-# Run audit evaluation
-python cli.py audit --task-id TASK-001 --primary 28.5 --secondary 14.2
-
-# Chat with supervisor
-python cli.py chat "Explain TBscore II thresholds"
-
-# Verify audit trail integrity
-python cli.py verify-audit
-
-# Batch process with agents
-python cli.py batch -i sample.csv -o agent_results.csv
-
-# Launch FastAPI server
+python -m pip install -r requirements.txt
 python cli.py serve --host 127.0.0.1 --port 8000
 ```
 
-### Parameter Reference (tb_score_ii.py)
-- `--v1`: Primary parameter (float, default: 10.0)
-- `--v2`: Secondary parameter (float, default: 5.0)
-- `--v3`: Tertiary parameter (float, default: 2.0)
-- `-i/--input`: Input CSV file path (required for batch)
-- `-o/--output`: Output CSV file path (default: results.csv)
+The local web UI is served at `/`. Use `POST /api/score` with the six structured clinical inputs; interactive API docs are at `/docs`. The separate `cli.py audit`, `/api/audit`, `/api/chat`, `agents/`, `enrichment.py` and `simulator.py` remain as **legacy demonstrations** using arbitrary measurements. Their alerts, mock responses, and enrichment labels **do not implement or validate TBscore II** and must not be used to direct clinical care.
 
-### Input Data Schema
+Access to `/api/audit/logs` requires `AUDIT_READ_TOKEN` in the server environment and a matching `X-Audit-Token` header. `AUDIT_SECRET_KEY` should be set to a strong random value for cross-restart audit-key consistency. The legacy regex-based identifier filter is not a validated de-identification system.
 
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `Patient_ID` | Patient identifier | Required |
-| `v1` | Primary observation metric | Required |
-| `v2` | Secondary observation metric | Required |
-| `v3` | Tertiary observation metric | Required |
+## Privacy and security
 
----
+The browser UI sends no requests, has no analytics, cookies, or local storage, and does not retain inputs. The API, when run separately, receives values over its configured network transport. Do not expose it directly to the public internet or submit personal health information without an appropriate secured deployment and privacy review. CSV outputs contain clinical observations; protect them as appropriate.
 
-## 🛡️ Security & Enterprise Architecture
-
-* **Zero-PHI Outbound Interceptor:** Active regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **Path Traversal Protection:** All file operations validate paths against allowed directories.
-* **Input Sanitization:** CSV field names are sanitized to prevent injection.
-* **Secure Defaults:** Audit keys are generated from `AUDIT_SECRET_KEY` env var with ephemeral fallback.
-* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
-
----
-
-## 🧪 Testing & Verification
-
-Run the automated test suite:
+## Testing
 
 ```bash
-pytest -v
+python -m pip install -r requirements.txt
+python -m pytest -q
+node --test web/test_score.mjs
+node --check web/app.mjs
 ```
 
-Execute high-throughput batch simulation benchmarks:
+CI tests Python 3.10–3.13 and Node 22. The GitHub Actions workflow also contains a static GitHub Pages deployment job for the `web/` directory; successful activation and the live address depend on Pages settings in the repository.
 
-```bash
-python simulator.py 1000
-```
+## Technology and compatibility
 
----
+Python standard library for score and CSV; HTML/CSS and native JavaScript modules for the browser; optional FastAPI, Uvicorn, and Pydantic for the server. Browser UI requires a modern browser supporting ES modules and `FormData`. The optional Python server can also be run via the provided Dockerfile / Compose configuration.
 
-## 🐳 Container Deployment
+## License
 
-```bash
-docker build -t tb-score-ii-clinical-severity .
-docker run -p 8000:8000 -e AUDIT_SECRET_KEY=your-secret-key tb-score-ii-clinical-severity
-```
-
-Or using docker-compose:
-
-```bash
-AUDIT_SECRET_KEY=your-secret-key docker-compose up
-```
-
----
-
-## 📁 Project Structure
-
-```
-tb-score-ii-clinical-severity/
-├── agents/                  # Enterprise agent suite
-│   ├── api.py              # FastAPI REST server
-│   ├── base.py             # Security, PHI guard, audit trail
-│   ├── models.py           # Pydantic data models
-│   ├── supervisor.py       # Multi-worker orchestrator
-│   ├── workers.py          # Specialized domain workers
-│   ├── llm_factory.py      # LLM provider factory
-│   ├── metrics.py          # Prometheus metrics
-│   ├── learning.py         # Bayesian calibration engine
-│   └── streamer.py         # WebSocket telemetry
-├── tests/                  # Test suite
-├── web/                    # Operations console (HTML)
-├── tb_score_ii.py          # Core algorithm & CLI
-├── cli.py                  # Enterprise agent CLI
-├── enrichment.py           # Domain enrichment engines
-├── simulator.py            # High-throughput simulator
-├── requirements.txt        # Python dependencies
-├── Dockerfile              # Container build
-├── docker-compose.yml      # Container orchestration
-└── sample.csv              # Sample input data
-```
+MIT — see [LICENSE](LICENSE).
