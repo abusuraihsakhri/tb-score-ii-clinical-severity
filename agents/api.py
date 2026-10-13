@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import FastAPI, Header, HTTPException
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 from tb_score_ii import calculate_metrics
 from .base import AuditLogger, SecurityException
@@ -21,6 +21,7 @@ app = FastAPI(
 
 
 class ScoreRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     cough: bool
     dyspnea: bool
     chest_pain: bool

@@ -94,7 +94,7 @@ class AuditTrail:
             "current_hash": signature,
         }
         self.logs.append(entry)
-        return entry
+        return copy.deepcopy(entry)
 
     def verify_integrity(self) -> bool:
         prev = "GENESIS_BLOCK_0000000000000000"

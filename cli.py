@@ -21,7 +21,7 @@ def _safe_resolve_path(path_str: str) -> Path:
     cwd = Path.cwd().resolve()
     import tempfile
     temp_dir = Path(tempfile.gettempdir()).resolve()
-    if not (str(path).startswith(str(cwd)) or str(path).startswith(str(temp_dir))):
+    if not (path.is_relative_to(cwd) or path.is_relative_to(temp_dir)):
         raise ValueError(f"Path traversal blocked: {path_str} resolves outside allowed directories")
     return path
 
@@ -70,7 +70,7 @@ def main(argv=None):
         dossier = supervisor.process_task(payload)
         print("=" * 80)
         print(f"  TB SCORE II CLINICAL SEVERITY")
-        print(f"  Domain: Antimicrobial Stewardship & Microbiology | Standard: CLSI M100 / EUCAST / CDC NHSN Guidelines")
+        print(f"  Legacy demonstration only; generic metrics do not represent TBscore II")
         print(f"  Dossier ID: {dossier.dossier_id} | Urgency: [{dossier.overall_urgency.value}]")
         print("=" * 80)
         for a in dossier.alerts:
@@ -113,7 +113,7 @@ def main(argv=None):
                 primary_metric=float(r.get("primary_metric", 15.0)),
                 secondary_metric=float(r.get("secondary_metric", 5.0)),
                 status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=bool(r.get("is_critical_flag", False)),
+                is_critical_flag=str(r.get("is_critical_flag", "false")).strip().lower() in ("true", "1", "yes"),
             )
             dossier = supervisor.process_task(payload)
             row_dict = dict(r)
